@@ -83,9 +83,9 @@ main:
 
 .loop:
 	mov rax, 0					; sys_read
-	mov rdi, qword [rbp - 8*3]	
-	mov rsi, buffer
-	mov rdx, SIZE
+	mov rdi, qword [rbp - 8*3]	; rdi = fd_in 	(file descriptor to read from)
+	mov rsi, buffer				; rsi = buffer	(store what we read in buffer)
+	mov rdx, SIZE				; rdx = size	(read SIZE bytes from the file descriptor)
 	syscall
 
 	cmp rax, 0
@@ -93,37 +93,37 @@ main:
 	cmp rax, SIZE
 	jl .last
 
-	mov rax, 1		; sys_write
-	mov rdi, qword [rbp - 8*4]
-	mov rsi, buffer
-	mov rdx, SIZE
+	mov rax, 1					; sys_write
+	mov rdi, qword [rbp - 8*4]	; rdi = fd_out (The destination file descriptor)
+	mov rsi, buffer				; rsi = buffer (rsi = The memory address pointing to your string data to write from.)
+	mov rdx, SIZE				; rdx = how many bytes were read (=size) (so we will write the same amount of byes in the output file)
 	syscall
 
 	cmp rax, 0
 	jl .cannot_write
 
-	add qword [rbp - 8*5], SIZE
-	jmp .loop
+	add qword [rbp - 8*5], SIZE	; add latest amount of bytes (=SIZE) to total
+	jmp .loop					; loop again to read more bytes, if there are more bytes
 
 .last:
-	mov rdx, rax
-	mov r9, rax
-	mov rax, 1		; sys_write
-	mov rdi, qword [rbp - 8*4]
-	mov rsi, buffer
+	mov rdx, rax				; rdx = how many bytes were read (so we will write the same amount of byes in the output file)
+	mov r9, rax					; backup how many bytes were read (rax)
+	mov rax, 1					; sys_write
+	mov rdi, qword [rbp - 8*4]	; rdi = fd_out (The destination file descriptor)
+	mov rsi, buffer				; rsi = buffer (rsi = The memory address pointing to your string data to write from.)
 	syscall
 
 	cmp rax, 0
 	jl .cannot_write
 
-	add qword [rbp - 8*5], r9
+	add qword [rbp - 8*5], r9	; add latest amount of bytes to total
 
-	mov rax, 3		; sys_close
-	mov rdi, [rbp - 8*3]	; fd_in
+	mov rax, 3					; sys_close
+	mov rdi, [rbp - 8*3]		; fd_in
 	syscall
 
-	mov rax, 3		; sys_close
-	mov rdi, [rbp - 8*4]	; fd_out
+	mov rax, 3					; sys_close
+	mov rdi, [rbp - 8*4]		; fd_out
 	syscall
 
 	mov rdi, fmt_bytes
