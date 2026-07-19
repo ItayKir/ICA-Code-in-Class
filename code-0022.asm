@@ -46,44 +46,44 @@ main:
 	cmp qword rdi, 3
 	jne .usage
 
-	mov rbx, qword [rsi + 8*1]
-	mov qword [rbp - 8*1], rbx ; file_in
-	mov rbx, qword [rsi + 8*2]
-	mov qword [rbp - 8*2], rbx ; file_out
+	mov rbx, qword [rsi + 8*1]	; rsi points to first variable (program name), so we need [rsi+8*1]
+	mov qword [rbp - 8*1], rbx  ; [rbp - 8*1] = file_in
+	mov rbx, qword [rsi + 8*2]	; rsi points to first variable (program name), so we need [rsi+8*2]
+	mov qword [rbp - 8*2], rbx  ; [rbp - 8*2] = file_out
 
 	mov rdi, fmt_cp_report
-	mov rsi, qword [rbp - 8*1]
+	mov rsi, qword [rbp - 8*1]	
 	mov rdx, qword [rbp - 8*2]
 	mov rax, 0
 	call printf
 
-	mov rax, 2		; sys_open
-	mov rdi, qword [rbp - 8*1] ; file_in
-	mov rsi, 0		; O_RDONLY
-	mov rdx, 0		; mode is irrelevant for read
+	mov rax, 2					; sys_open
+	mov rdi, qword [rbp - 8*1] 	; file_in
+	mov rsi, 0					; O_RDONLY
+	mov rdx, 0					; mode is irrelevant for read
 	syscall
 
-	cmp rax, 0
+	cmp rax, 0					; if open call failed, rax = 0
 	jl .cannot_open_for_read
 
-	mov qword [rbp - 8*3], rax ; fd_in
+	mov qword [rbp - 8*3], rax 	; [rbp - 8*3] = fd_in
 
-	mov rax, 2		; sys_open
-	mov rdi, qword [rbp - 8*2] ; file_out
-	mov rsi, 0x241          ; O_WRONLY | O_CREAT | O_TRUNC
-	mov rdx, 0o644		; user: read/write, else: read
+	mov rax, 2					; sys_open
+	mov rdi, qword [rbp - 8*2] 	; file_out
+	mov rsi, 0x241          	; O_WRONLY | O_CREAT | O_TRUNC
+	mov rdx, 0o644				; user: read/write, else: read
 	syscall
 
-	cmp rax, 0
+	cmp rax, 0					; if open call failed, rax = 0
 	jl .cannot_open_for_write
 
-	mov qword [rbp - 8*4], rax ; fd_out
+	mov qword [rbp - 8*4], rax 	; [rbp - 8*4] = fd_out
 
-	mov qword [rbp - 8*5], 0 ; total # of character
+	mov qword [rbp - 8*5], 0 	; total # of character
 
 .loop:
-	mov rax, 0		; sys_read
-	mov rdi, qword [rbp - 8*3]
+	mov rax, 0					; sys_read
+	mov rdi, qword [rbp - 8*3]	
 	mov rsi, buffer
 	mov rdx, SIZE
 	syscall

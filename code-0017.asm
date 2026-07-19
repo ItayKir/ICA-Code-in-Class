@@ -84,7 +84,7 @@ hanoi:
 	push qword [rbp + 8*5]
 	mov rax, qword [rbp + 8*2]
 	dec rax
-	push rax
+	push rax	
 	call hanoi
 .done:
 	mov rsp, rbp

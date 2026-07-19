@@ -48,14 +48,14 @@ main:
 	mov rdi, qword [stderr]	; errors go to stderr
 	mov rsi, fmt_usage	; explain correct usage
 	mov rax, 0		; no fp registers in use
-	call fprintf		; send output to stderr...
+	call fprintf	; send output to stderr...
 
 	mov rax, -1		; status NOT OK
 	call exit		; exit as per error
 
 fact:
 	push rbp		; back up the frame-pointer
-	mov rbp, rsp		; set fp to the base of the current frame
+	mov rbp, rsp	; set fp to the base of the current frame
 
 ;;; The structure of the activation frame:	
 ;;; |         | n        | qword [rbp + 8*2] |
@@ -68,14 +68,14 @@ fact:
 	dec rax			; compute n-1
 	push rax		; push n-1
 	call fact		; compute fact(n - 1) --> rax
-	add rsp, 8*1		; C-style: caller cleans the stack!
-	cqo			; extend RAX --> RDX:RAX
+	add rsp, 8*1	; C-style: caller cleans the stack!
+	cqo				; extend RAX --> RDX:RAX
 	mul qword [rbp + 8*2]	; RDX:RAX = n * fact(n - 1)
 	jmp .done
 .zero:
 	mov rax, 1		; fact(0) = 1
 .done:	
-	mov rsp, rbp		; restore original stack-pointer
+	mov rsp, rbp	; restore original stack-pointer
 	pop rbp			; set fp to point to previous frame
 	ret
 
